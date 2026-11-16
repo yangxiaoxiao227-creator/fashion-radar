@@ -1,0 +1,75 @@
+name: 每日趋势雷达
+
+on:
+  schedule:
+    - cron: "30 22 * * *"   # UTC 22:30 = 北京时间每天 06:30
+  workflow_dispatch:         # 允许在 Actions 页面手动点击运行
+
+permissions: {}
+
+concurrency:
+  group: daily-radar
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: |
+          pip install -r requirements.txt pytest
+          python -m playwright install --with-deps chromium
+
+      - name: 自检（离线测试）
+        run: python -m pytest -q
+
+      - name: 采集并生成报告
+        run: python run.py
+
+      - name: 上传调试数据（排查用，保留 7 天）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-${{ github.run_number }}
+          path: debug/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: 保存报告和历史数据
+        run: |
+          git config user.name "fashion-radar-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data docs
+          git diff --cached --quiet || git commit -m "趋势雷达 $(TZ=Asia/Shanghai date +%F)"
+          git push
+
+      - name: 上传网页文件
+        if: github.ref_name == github.event.repository.default_branch
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+
+  deploy:
+    name: 发布到 GitHub Pages
+    if: github.ref_name == github.event.repository.default_branch
+    needs: run
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 发布网页
+        id: deployment
+        uses: actions/deploy-pages@v4

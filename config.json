@@ -1,0 +1,40 @@
+{
+  "_说明": "改这个文件就能调整采集范围。true 表示启用，false 表示跳过。改完保存即可，下次运行生效。",
+  "timezone": "Asia/Shanghai",
+  "sources": {
+    "musinsa": {
+      "enabled": true,
+      "_说明": "韩国 MUSINSA 女装榜单。gf=F 表示女性，ageBand 是年龄段。",
+      "pages": [
+        {"name": "女装总榜", "url": "https://www.musinsa.com/main/musinsa/ranking?storeCode=musinsa&sectionId=199&contentsId=&categoryCode=000&gf=F&ageBand=AGE_BAND_ALL"},
+        {"name": "女装 25-29 岁", "url": "https://www.musinsa.com/main/musinsa/ranking?storeCode=musinsa&sectionId=199&contentsId=&categoryCode=000&gf=F&ageBand=AGE_BAND_25"},
+        {"name": "女装外套", "url": "https://www.musinsa.com/main/musinsa/ranking?storeCode=musinsa&sectionId=199&contentsId=&categoryCode=002&gf=F&ageBand=AGE_BAND_ALL"}
+      ],
+      "max_items_per_page": 60
+    },
+    "wear": {
+      "enabled": true,
+      "_说明": "日本 WEAR 穿搭排行。会先打开首页自动寻找排行和趋势关键词页面。",
+      "home": "https://wear.jp/",
+      "extra_pages": ["https://wear.jp/ranking/"],
+      "max_ranking_pages": 3,
+      "women_only": true
+    },
+    "tiktok": {
+      "enabled": true,
+      "_说明": "TikTok Creative Center 热门话题。匿名访问时 TikTok 只给每个榜单的前 3 名。",
+      "countries": ["JP", "KR"],
+      "periods": [7, 30],
+      "page_templates": [
+        "https://ads.tiktok.com/creative/creativeCenter/trends/hashtag?region={country}&period={period}",
+        "https://ads.tiktok.com/business/creativecenter/inspiration/popular/hashtag/pc/en?region={country}&period={period}"
+      ]
+    },
+    "pinterest": {
+      "enabled": true,
+      "_说明": "Pinterest Trends 增长中的搜索词。日本目前可能没有数据，韩国待验证；美国作为全球参照。",
+      "countries": ["KR", "US"],
+      "page_template": "https://trends.pinterest.com/?country={country}&trendsPreset=3"
+    }
+  }
+}
